@@ -7,10 +7,9 @@
 ### 前置準備
 - 已安裝 **Docker** & **Docker Compose**。
 - 已安裝 **NVIDIA Drivers**。
-- 已安裝 **NVIDIA Container Toolkit** (確保 Docker 能存取 GPU)。
+- 已安裝 **NVIDIA Container Toolkit**。
 
 ### 啟動監控堆疊
-在專案根目錄下執行：
 ```bash
 docker compose up -d
 ```
@@ -19,53 +18,45 @@ docker compose up -d
 - **Grafana**: [http://localhost:3000](http://localhost:3000) (預設帳密: `admin` / `admin`)
 - **Prometheus**: [http://localhost:9090](http://localhost:9090)
 
-> **注意**: 啟動後 Grafana 已自動匯入資料來源與專屬 Dashboard，您只需登入即可查看。
+## 📊 監控指標對照表
 
-## 📊 監控指標說明
+| 硬體目標 | 監控指標 | 資料來源 | 關鍵技術指標名稱 (PromQL) | 備註 |
+| :--- | :--- | :--- | :--- | :--- |
+| **CPU** | 使用率 | Node Exporter | `node_cpu_seconds_total` | 需過濾 mode="idle" |
+| | 溫度 | Node Exporter | `node_hwmon_temp_celsius` | 需主機板驅動支援 |
+| | 系統負載 | Node Exporter | `node_load1` | 觀察排程佇列長度 |
+| **RAM** | 使用率 | Node Exporter | `node_memory_MemTotal_bytes` | (Total - Available) / Total |
+| | 分頁錯誤 | Node Exporter | `node_vmstat_pgmajfault` | 數值高代表發生 Disk Swap |
+| **GPU** | 整體使用率 | DCGM Exporter | `DCGM_FI_DEV_GPU_UTIL` | 包含 CUDA 計算 |
+| | Tensor Core | DCGM Exporter | `DCGM_FI_PROF_PIPE_TENSOR_ACTIVE` | AI 算力活躍度指標 |
+| | 顯存使用量 | DCGM Exporter | `DCGM_FI_DEV_FB_USED` | 監控 OOM (Out of Memory) |
+| | 即時功耗 | DCGM Exporter | `DCGM_FI_DEV_POWER_USAGE` | 單位：瓦特 (W) |
+| | GPU 溫度 | DCGM Exporter | `DCGM_FI_DEV_GPU_TEMP` | 監控熱降頻 (Throttling) |
+| **SSD** | IOPS | Node Exporter | `node_disk_reads_completed_total` | 每秒讀寫次數 |
+| | 吞吐量 | Node Exporter | `node_disk_read_bytes_total` | 監控 MB/s |
+| | I/O 延遲 | Node Exporter | `node_disk_io_time_seconds_total` | 觀察 SSD 是否過熱變慢 |
+| | 硬碟溫度 | Node Exporter | `node_hwmon_temp_celsius` | 過濾 `chip=~"nvme.*"` |
 
-### 1. CPU & 記憶體
-- **CPU Usage**: 總體使用率。
-- **RAM Usage**: 實時記憶體佔用。
-- **Page Faults**: 監控是否有磁碟置換 (Swap)，頻繁發生會嚴重拖慢 AI 效能。
+## 🛠️ 開發與同步 (PR 流程)
 
-### 2. GPU (NVIDIA DCGM)
-- **GPU & Tensor Core Util**: AI 算力核心活躍度。
-- **GPU Power & Temp**: 功耗與溫度，預防熱降頻 (Throttling)。
-- **Fan Speed**: 風扇轉速百分比。
+1. **更新儀表板**：
+   修改 `generate_dashboard_v2.py` 後執行：
+   ```bash
+   uv run generate_dashboard_v2.py
+   cp ai_burn_in_dashboard_v2.json grafana/dashboards/dashboards.json
+   ```
 
-### 3. SSD / 儲存
-- **Disk Throughput**: 讀寫吞吐量 (MB/s)。
-- **Hardware Temperatures**: SSD 與晶片組溫度。
-
-## 🛠️ 專案開發與維護
-
-### 更新儀表板
-本專案使用 Python 腳本生成 Grafana Dashboard JSON。若需修改佈局或指標，請修改 `generate_dashboard_v2.py` 後執行：
-
-```bash
-# 使用 uv 執行
-uv run generate_dashboard_v2.py
-
-# 同步至 Grafana 配置目錄
-cp ai_burn_in_dashboard_v2.json grafana/dashboards/dashboards.json
-
-# 重啟 Grafana 使其加載新配置
-docker-compose restart grafana
-```
-
-### 專案結構
-```text
-.
-├── docker-compose.yml           # 定義 Prometheus, Grafana, Exporters
-├── generate_dashboard_v2.py     # Dashboard 生成腳本
-├── ai_burn_in_dashboard_v2.json # 儀表板定義檔
-├── prometheus/
-│   └── prometheus.yml           # Prometheus 採集配置
-└── grafana/                     # Grafana 自動配置
-    ├── dashboards/              # 存放 JSON 儀表板
-    └── provisioning/            # 自動加載資料來源與目錄配置
-```
+2. **推送與 PR**：
+   ```bash
+   git add .
+   git commit -m "update: sync monitoring metrics and split gpu panels"
+   git push origin main
+   ```
+   推送後請至 GitHub [jfphi/moniter-1](https://github.com/jfphi/moniter-1) 發起 Pull Request 給 `phisonaistar/moniter`。
 
 ## 📋 疑難排解
-- **看不到 GPU 數據**：請確認 `nvidia-smi` 可運作，且執行 `docker run --rm --gpus all ubuntu nvidia-smi` 能看到 GPU 資訊。
-- **資料來源未連接**：Grafana 在啟動時會自動讀取 `grafana/provisioning/datasources/datasource.yml`，請確認其 URL 設定為 `http://prometheus:9090`。
+- **GPU 數據顯示 No Data**：
+  - 檢查環境是否安裝 NVIDIA Container Toolkit。
+  - 執行 `docker exec -it dcgm-exporter dcgmi group -l` 檢查 GPU 狀態。
+- **溫度消失**：
+  - 部分硬體需安裝 `lm-sensors` 並執行 `sudo sensors-detect` 才能由 Node Exporter 抓取。
