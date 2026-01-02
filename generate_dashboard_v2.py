@@ -27,9 +27,10 @@ dashboard = {
         ]
     },
     "time": {"from": "now-1h", "to": "now"},
+    "refresh": "1s",
     "title": "AI Hardware Burn-in Monitor (Full Stack)",
     "uid": "ai_burn_in_v2",
-    "version": 3
+    "version": 4
 }
 
 def create_panel(id, title, description, targets, y_axis_unit, gridPos):
