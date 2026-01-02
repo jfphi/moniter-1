@@ -33,34 +33,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_RENDERING_SERVER_URL=http://renderer:8081/render
-      - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
-      - GF_LOG_LEVEL=info
-      # 完全禁用背景更新與外掛下載，避開 403/TLS 錯誤
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=grafana-image-renderer
-      - GF_INSTALL_PLUGINS=
-      - GF_PLUGINS_ENFORCE_SIGNATURE_VERIFICATION=false
-      - GF_UPGRADING_CHECK_FOR_UPDATES=false
-      # 允許本機匿名訪問抓圖
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    links:
-      - renderer
-    networks:
-      - monitoring
-
-  # 2.1 Renderer Service: 使用更強壯的啟動參數
-  renderer:
-    image: grafana/grafana-image-renderer:latest
-    container_name: renderer
-    environment:
-      - IGNORE_HTTPS_ERRORS=true
-      - BROWSER_BIN=/usr/bin/google-chrome
-      - ENABLE_METRICS=true
-    command:
-      - --no-sandbox
-      - --disable-setuid-sandbox
-      - --disable-dev-shm-usage
+      - GF_INSTALL_PLUGINS=grafana-image-renderer
     networks:
       - monitoring
 
