@@ -12,7 +12,7 @@
 ### 啟動監控堆疊
 在專案根目錄下執行：
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 訪問服務
