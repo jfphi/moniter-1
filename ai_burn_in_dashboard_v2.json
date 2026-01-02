@@ -1,0 +1,386 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 10,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "type": "row",
+      "title": "CPU & Memory Performance",
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "type": "timeseries",
+      "title": "CPU Usage Total (%)",
+      "description": "Total CPU utilization",
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle', instance=~'$instance'}[1m])) * 100)",
+          "legendFormat": "CPU Usage",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    },
+    {
+      "id": 12,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "type": "timeseries",
+      "title": "RAM Usage (%)",
+      "description": "Memory usage",
+      "targets": [
+        {
+          "expr": "100 * (1 - (node_memory_MemAvailable_bytes{instance=~'$instance'} / node_memory_MemTotal_bytes{instance=~'$instance'}))",
+          "legendFormat": "RAM Used",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    },
+    {
+      "id": 13,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "type": "timeseries",
+      "title": "Page Faults (Major)",
+      "description": "Major page faults imply disk swapping (Bad for performance)",
+      "targets": [
+        {
+          "expr": "rate(node_vmstat_pgmajfault{instance=~'$instance'}[1m])",
+          "legendFormat": "Major Faults/sec",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    },
+    {
+      "id": 20,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "type": "row",
+      "title": "GPU AI Performance (DCGM)",
+      "collapsed": false
+    },
+    {
+      "id": 21,
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 10
+      },
+      "type": "timeseries",
+      "title": "GPU & Tensor Core Util",
+      "description": "Utilization",
+      "targets": [
+        {
+          "expr": "avg by (gpu) (DCGM_FI_DEV_GPU_UTIL{instance=~'$instance', gpu=~'$gpu'})",
+          "legendFormat": "GPU {{gpu}} Util",
+          "refId": "A"
+        },
+        {
+          "expr": "avg by (gpu) (DCGM_FI_PROF_PIPE_TENSOR_ACTIVE{instance=~'$instance', gpu=~'$gpu'})",
+          "legendFormat": "GPU {{gpu}} Tensor",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    },
+    {
+      "id": 22,
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 10
+      },
+      "type": "timeseries",
+      "title": "GPU Power & Temp",
+      "description": "Power & Thermal",
+      "targets": [
+        {
+          "expr": "DCGM_FI_DEV_POWER_USAGE{instance=~'$instance', gpu=~'$gpu'}",
+          "legendFormat": "GPU {{gpu}} Power (W)",
+          "refId": "A"
+        },
+        {
+          "expr": "DCGM_FI_DEV_GPU_TEMP{instance=~'$instance', gpu=~'$gpu'}",
+          "legendFormat": "GPU {{gpu}} Temp (C)",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    },
+    {
+      "id": 23,
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 10
+      },
+      "type": "timeseries",
+      "title": "GPU Fan Speed",
+      "description": "Cooling fan speed percentage",
+      "targets": [
+        {
+          "expr": "DCGM_FI_DEV_FAN_SPEED{instance=~'$instance', gpu=~'$gpu'}",
+          "legendFormat": "GPU {{gpu}} Fan",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    },
+    {
+      "id": 30,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "type": "row",
+      "title": "SSD / Storage I/O",
+      "collapsed": false
+    },
+    {
+      "id": 31,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "type": "timeseries",
+      "title": "Disk Throughput (MB/s)",
+      "description": "R/W Speed",
+      "targets": [
+        {
+          "expr": "rate(node_disk_read_bytes_total{instance=~'$instance'}[1m])",
+          "legendFormat": "{{device}} Read",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_disk_written_bytes_total{instance=~'$instance'}[1m])",
+          "legendFormat": "{{device}} Write",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    },
+    {
+      "id": 32,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "type": "timeseries",
+      "title": "Hardware Temperatures (SSD/Chipset)",
+      "description": "All sensors reported by hwmon (Look for nvme/drive)",
+      "targets": [
+        {
+          "expr": "node_hwmon_temp_celsius{instance=~'$instance'}",
+          "legendFormat": "{{chip}} {{sensor}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity"
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "datasource": "Prometheus"
+    }
+  ],
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [
+    "AI-Burn-In",
+    "Hardware-Monitor",
+    "v2"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "No data",
+          "value": "No data"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Instance (Host)",
+        "multi": false,
+        "name": "instance",
+        "options": [],
+        "query": "label_values(node_uname_info, instance)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "No data",
+          "value": "No data"
+        },
+        "hide": 0,
+        "label": "GPU ID",
+        "name": "gpu",
+        "options": [],
+        "query": "label_values(DCGM_FI_DEV_GPU_TEMP, gpu)",
+        "refresh": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "title": "AI Hardware Burn-in Monitor (Full Stack)",
+  "uid": "ai_burn_in_v2",
+  "version": 2
+}
