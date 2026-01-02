@@ -35,17 +35,28 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
+      - GF_LOG_LEVEL=info
+      # 減少背景連網報錯
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=grafana-image-renderer
+      - GF_INSTALL_PLUGINS=
+      # 允許本機匿名訪問抓圖 (效能與成功率關鍵)
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     networks:
       - monitoring
 
-  # 2.1 Renderer Service: 負責將儀表板渲染為圖片 (避開下載安裝憑證問題)
+  # 2.1 Renderer Service: 使用更強壯的啟動參數
   renderer:
     image: grafana/grafana-image-renderer:latest
     container_name: renderer
-    ports:
-      - 8081:8081
     environment:
       - IGNORE_HTTPS_ERRORS=true
+      - BROWSER_BIN=/usr/bin/google-chrome
+      - ENABLE_METRICS=true
+    command:
+      - --no-sandbox
+      - --disable-setuid-sandbox
+      - --disable-dev-shm-usage
     networks:
       - monitoring
 
