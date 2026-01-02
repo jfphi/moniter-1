@@ -106,7 +106,7 @@
       },
       "type": "timeseries",
       "title": "Page Faults (Major)",
-      "description": "Major page faults imply disk swapping (Bad for performance)",
+      "description": "Major page faults imply disk swapping",
       "targets": [
         {
           "expr": "rate(node_vmstat_pgmajfault{instance=~'$instance'}[1m])",
@@ -154,12 +154,12 @@
       "description": "Utilization",
       "targets": [
         {
-          "expr": "avg by (gpu) (DCGM_FI_DEV_GPU_UTIL{instance=~'$instance', gpu=~'$gpu'})",
+          "expr": "avg by (gpu) (DCGM_FI_DEV_GPU_UTIL{gpu=~'$gpu'})",
           "legendFormat": "GPU {{gpu}} Util",
           "refId": "A"
         },
         {
-          "expr": "avg by (gpu) (DCGM_FI_PROF_PIPE_TENSOR_ACTIVE{instance=~'$instance', gpu=~'$gpu'})",
+          "expr": "avg by (gpu) (DCGM_FI_PROF_PIPE_TENSOR_ACTIVE{gpu=~'$gpu'})",
           "legendFormat": "GPU {{gpu}} Tensor",
           "refId": "B"
         }
@@ -192,12 +192,12 @@
       "description": "Power & Thermal",
       "targets": [
         {
-          "expr": "DCGM_FI_DEV_POWER_USAGE{instance=~'$instance', gpu=~'$gpu'}",
+          "expr": "DCGM_FI_DEV_POWER_USAGE{gpu=~'$gpu'}",
           "legendFormat": "GPU {{gpu}} Power (W)",
           "refId": "A"
         },
         {
-          "expr": "DCGM_FI_DEV_GPU_TEMP{instance=~'$instance', gpu=~'$gpu'}",
+          "expr": "DCGM_FI_DEV_GPU_TEMP{gpu=~'$gpu'}",
           "legendFormat": "GPU {{gpu}} Temp (C)",
           "refId": "B"
         }
@@ -230,7 +230,7 @@
       "description": "Cooling fan speed percentage",
       "targets": [
         {
-          "expr": "DCGM_FI_DEV_FAN_SPEED{instance=~'$instance', gpu=~'$gpu'}",
+          "expr": "DCGM_FI_DEV_FAN_SPEED{gpu=~'$gpu'}",
           "legendFormat": "GPU {{gpu}} Fan",
           "refId": "A"
         }
@@ -259,7 +259,7 @@
         "y": 19
       },
       "type": "row",
-      "title": "SSD / Storage I/O",
+      "title": "SSD / Storage I/O (NVMe Only)",
       "collapsed": false
     },
     {
@@ -271,16 +271,16 @@
         "y": 20
       },
       "type": "timeseries",
-      "title": "Disk Throughput (MB/s)",
-      "description": "R/W Speed",
+      "title": "NVMe Throughput (MB/s)",
+      "description": "R/W Speed for NVMe drives",
       "targets": [
         {
-          "expr": "rate(node_disk_read_bytes_total{instance=~'$instance'}[1m])",
+          "expr": "rate(node_disk_read_bytes_total{instance=~'$instance', device=~'nvme.*'}[1m])",
           "legendFormat": "{{device}} Read",
           "refId": "A"
         },
         {
-          "expr": "rate(node_disk_written_bytes_total{instance=~'$instance'}[1m])",
+          "expr": "rate(node_disk_written_bytes_total{instance=~'$instance', device=~'nvme.*'}[1m])",
           "legendFormat": "{{device}} Write",
           "refId": "B"
         }
@@ -309,11 +309,11 @@
         "y": 20
       },
       "type": "timeseries",
-      "title": "Hardware Temperatures (SSD/Chipset)",
-      "description": "All sensors reported by hwmon (Look for nvme/drive)",
+      "title": "NVMe Temperatures",
+      "description": "Temperatures for NVMe drives",
       "targets": [
         {
-          "expr": "node_hwmon_temp_celsius{instance=~'$instance'}",
+          "expr": "node_hwmon_temp_celsius{instance=~'$instance', chip=~'nvme.*'}",
           "legendFormat": "{{chip}} {{sensor}}",
           "refId": "A"
         }
