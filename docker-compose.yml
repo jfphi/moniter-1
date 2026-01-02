@@ -36,12 +36,16 @@ services:
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
       - GF_LOG_LEVEL=info
-      # 減少背景連網報錯
+      # 完全禁用背景更新與外掛下載，避開 403/TLS 錯誤
       - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=grafana-image-renderer
       - GF_INSTALL_PLUGINS=
-      # 允許本機匿名訪問抓圖 (效能與成功率關鍵)
+      - GF_PLUGINS_ENFORCE_SIGNATURE_VERIFICATION=false
+      - GF_UPGRADING_CHECK_FOR_UPDATES=false
+      # 允許本機匿名訪問抓圖
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    links:
+      - renderer
     networks:
       - monitoring
 
