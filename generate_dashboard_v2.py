@@ -110,7 +110,7 @@ dashboard["panels"].append(create_panel(
     gridPos={"h": 8, "w": 8, "x": 0, "y": 1}
 ))
 
-# RAM Usage (New!)
+# RAM Usage
 dashboard["panels"].append(create_panel(
     id=12,
     title="RAM Usage (%)",
@@ -124,11 +124,11 @@ dashboard["panels"].append(create_panel(
     gridPos={"h": 8, "w": 8, "x": 8, "y": 1}
 ))
 
-# Page Faults (New!)
+# Page Faults
 dashboard["panels"].append(create_panel(
     id=13,
     title="Page Faults (Major)",
-    description="Major page faults imply disk swapping (Bad for performance)",
+    description="Major page faults imply disk swapping",
     targets=[{
         "expr": "rate(node_vmstat_pgmajfault{instance=~'$instance'}[1m])",
         "legendFormat": "Major Faults/sec",
@@ -148,39 +148,39 @@ dashboard["panels"].append({
     "collapsed": False
 })
 
-# GPU Utilization
+# GPU Utilization - Removed instance filter to fix mismatch
 dashboard["panels"].append(create_panel(
     id=21,
     title="GPU & Tensor Core Util",
     description="Utilization",
     targets=[
-        { "expr": "avg by (gpu) (DCGM_FI_DEV_GPU_UTIL{instance=~'$instance', gpu=~'$gpu'})", "legendFormat": "GPU {{gpu}} Util", "refId": "A" },
-        { "expr": "avg by (gpu) (DCGM_FI_PROF_PIPE_TENSOR_ACTIVE{instance=~'$instance', gpu=~'$gpu'})", "legendFormat": "GPU {{gpu}} Tensor", "refId": "B" }
+        { "expr": "avg by (gpu) (DCGM_FI_DEV_GPU_UTIL{gpu=~'$gpu'})", "legendFormat": "GPU {{gpu}} Util", "refId": "A" },
+        { "expr": "avg by (gpu) (DCGM_FI_PROF_PIPE_TENSOR_ACTIVE{gpu=~'$gpu'})", "legendFormat": "GPU {{gpu}} Tensor", "refId": "B" }
     ],
     y_axis_unit="percent",
     gridPos={"h": 9, "w": 8, "x": 0, "y": 10}
 ))
 
-# GPU Power & Temp
+# GPU Power & Temp - Removed instance filter
 dashboard["panels"].append(create_panel(
     id=22,
     title="GPU Power & Temp",
     description="Power & Thermal",
     targets=[
-        { "expr": "DCGM_FI_DEV_POWER_USAGE{instance=~'$instance', gpu=~'$gpu'}", "legendFormat": "GPU {{gpu}} Power (W)", "refId": "A" },
-        { "expr": "DCGM_FI_DEV_GPU_TEMP{instance=~'$instance', gpu=~'$gpu'}", "legendFormat": "GPU {{gpu}} Temp (C)", "refId": "B" }
+        { "expr": "DCGM_FI_DEV_POWER_USAGE{gpu=~'$gpu'}", "legendFormat": "GPU {{gpu}} Power (W)", "refId": "A" },
+        { "expr": "DCGM_FI_DEV_GPU_TEMP{gpu=~'$gpu'}", "legendFormat": "GPU {{gpu}} Temp (C)", "refId": "B" }
     ],
     y_axis_unit="watt",
     gridPos={"h": 9, "w": 8, "x": 8, "y": 10}
 ))
 
-# GPU Fan Speed (New!)
+# GPU Fan Speed - Removed instance filter
 dashboard["panels"].append(create_panel(
     id=23,
     title="GPU Fan Speed",
     description="Cooling fan speed percentage",
     targets=[
-        { "expr": "DCGM_FI_DEV_FAN_SPEED{instance=~'$instance', gpu=~'$gpu'}", "legendFormat": "GPU {{gpu}} Fan", "refId": "A" }
+        { "expr": "DCGM_FI_DEV_FAN_SPEED{gpu=~'$gpu'}", "legendFormat": "GPU {{gpu}} Fan", "refId": "A" }
     ],
     y_axis_unit="percent",
     gridPos={"h": 9, "w": 8, "x": 16, "y": 10}
@@ -192,30 +192,30 @@ dashboard["panels"].append({
     "id": 30,
     "gridPos": {"h": 1, "w": 24, "x": 0, "y": 19},
     "type": "row",
-    "title": "SSD / Storage I/O",
+    "title": "SSD / Storage I/O (NVMe Only)",
     "collapsed": False
 })
 
-# Disk Throughput
+# Disk Throughput - Added nvme filter
 dashboard["panels"].append(create_panel(
     id=31,
-    title="Disk Throughput (MB/s)",
-    description="R/W Speed",
+    title="NVMe Throughput (MB/s)",
+    description="R/W Speed for NVMe drives",
     targets=[
-        { "expr": "rate(node_disk_read_bytes_total{instance=~'$instance'}[1m])", "legendFormat": "{{device}} Read", "refId": "A" },
-        { "expr": "rate(node_disk_written_bytes_total{instance=~'$instance'}[1m])", "legendFormat": "{{device}} Write", "refId": "B" }
+        { "expr": "rate(node_disk_read_bytes_total{instance=~'$instance', device=~'nvme.*'}[1m])", "legendFormat": "{{device}} Read", "refId": "A" },
+        { "expr": "rate(node_disk_written_bytes_total{instance=~'$instance', device=~'nvme.*'}[1m])", "legendFormat": "{{device}} Write", "refId": "B" }
     ],
     y_axis_unit="bytes",
     gridPos={"h": 8, "w": 12, "x": 0, "y": 20}
 ))
 
-# Disk Temp (Generic)
+# Disk Temp - Added nvme chip filter
 dashboard["panels"].append(create_panel(
     id=32,
-    title="Hardware Temperatures (SSD/Chipset)",
-    description="All sensors reported by hwmon (Look for nvme/drive)",
+    title="NVMe Temperatures",
+    description="Temperatures for NVMe drives",
     targets=[
-        { "expr": "node_hwmon_temp_celsius{instance=~'$instance'}", "legendFormat": "{{chip}} {{sensor}}", "refId": "A" }
+        { "expr": "node_hwmon_temp_celsius{instance=~'$instance', chip=~'nvme.*'}", "legendFormat": "{{chip}} {{sensor}}", "refId": "A" }
     ],
     y_axis_unit="celsius",
     gridPos={"h": 8, "w": 12, "x": 12, "y": 20}
