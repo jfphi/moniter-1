@@ -50,7 +50,7 @@ def create_panel(id, title, description, targets, y_axis_unit, gridPos):
 dashboard["panels"].append({"id": 10, "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}, "type": "row", "title": "CPU & Memory Performance", "collapsed": False})
 
 dashboard["panels"].append(create_panel(11, "CPU Usage (%)", "Total CPU utilization", [{"expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle', instance=~'$instance'}[1m])) * 100)", "legendFormat": "Usage", "refId": "A"}], "percent", {"h": 8, "w": 8, "x": 0, "y": 1}))
-dashboard["panels"].append(create_panel(12, "CPU Temperature", "CPU Die Temp", [{"expr": "node_hwmon_temp_celsius{instance=~'$instance', chip=~'coretemp.*|cpu.*'}", "legendFormat": "{{sensor}}", "refId": "A"}], "celsius", {"h": 8, "w": 8, "x": 8, "y": 1}))
+dashboard["panels"].append(create_panel(12, "CPU Temperature", "CPU Die Temp", [{"expr": "node_hwmon_temp_celsius{instance=~'$instance', chip=~'.*coretemp.*|.*cpu.*'} or node_thermal_zone_temp{instance=~'$instance', type=~'.*pkg.*'}", "legendFormat": "{{sensor}}{{type}}", "refId": "A"}], "celsius", {"h": 8, "w": 8, "x": 8, "y": 1}))
 dashboard["panels"].append(create_panel(13, "System Load", "Queue Depth (Load1)", [{"expr": "node_load1{instance=~'$instance'}", "legendFormat": "Load 1m", "refId": "A"}], "short", {"h": 8, "w": 8, "x": 16, "y": 1}))
 
 dashboard["panels"].append(create_panel(14, "RAM Usage (%)", "Memory usage", [{"expr": "100 * (1 - (node_memory_MemAvailable_bytes{instance=~'$instance'} / node_memory_MemTotal_bytes{instance=~'$instance'}))", "legendFormat": "RAM Used", "refId": "A"}], "percent", {"h": 8, "w": 12, "x": 0, "y": 9}))

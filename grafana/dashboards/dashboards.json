@@ -75,8 +75,8 @@
       "description": "CPU Die Temp",
       "targets": [
         {
-          "expr": "node_hwmon_temp_celsius{instance=~'$instance', chip=~'coretemp.*|cpu.*'}",
-          "legendFormat": "{{sensor}}",
+          "expr": "node_hwmon_temp_celsius{instance=~'$instance', chip=~'.*coretemp.*|.*cpu.*'} or node_thermal_zone_temp{instance=~'$instance', type=~'.*pkg.*'}",
+          "legendFormat": "{{sensor}}{{type}}",
           "refId": "A"
         }
       ],
