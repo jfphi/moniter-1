@@ -58,6 +58,7 @@ services:
   dcgm-exporter:
     image: nvidia/dcgm-exporter:latest
     container_name: dcgm-exporter
+    command: ["-c", "1000"]
     environment:
       - DCGM_EXPORTER_NO_HOSTNAME=1
     cap_add:
